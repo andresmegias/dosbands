@@ -1,29 +1,30 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-DOSBANDS.PY
+DOSBANDSPLOTTER.PY
 1.3
 
 Andrés Megías
 
-El código dosbands.py, escrito en Python 3, permite representar bandas
+El código dosbandsplotter.py, escrito en Python 3, permite representar bandas
 electrónicas y densidades de estados producidas por el programa Quantum
 ESPRESSO. Se necesitan los módulos os, sys, ast, copy, glob, pathlib y
 configparser, de la librería estándar de Python, y también las librerías
 Numpy y Matplotlib.
+
     Para ejecutar el código sobre un archivo de bandas o de densidades de
 estados (o ambos), es necesario especificar algunos parámetros en un archivo
 de configuración. Para ejecutar el código debe escribirse en la terminal,
-estando en la carpeta del archivo dosbands.py:
+estando en la carpeta del archivo dosbandsplotter.py:
     
-		python3 dosbands.py <dirección>  .
+		python3 dosbandsplotter.py <dirección>  .
         
     El argumento <dirección> es la ruta del archivo de configuración; si no se
 especifica, se usará la ruta './config.txt', es decir,se buscará en la carpeta
 actual (./) el archivo de configuración con nombre config.txt. Si el archivo
 dosbands.py no está en la carpeta actual, sino en una carpeta con ruta <carpeta>,
-debe escribirse '<carpeta>/dosbands.py' en lugar de 'dosbands.py'. Además, si se
-incluye el archivo dosbands.py en una carpeta de ejecutables del sistema,
+debe escribirse '<carpeta>/dosbandsplotter.py' en lugar de 'dosbandsplotter.py'. Además, si se
+incluye el archivo dosbandsplotter.py en una carpeta de ejecutables del sistema,
 puede suprimirse 'python3' de la orden de ejecución.
 """
 
