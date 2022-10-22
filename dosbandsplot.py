@@ -1,31 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-DOSBANDSPLOT.PY
+Electronic Density of States and Bands Plotter
+dosbandsplot.py
 1.3
 
-Andrés Megías
+Andrés Megías Toledano
 
-El código dosbandsplot.py, escrito en Python 3, permite representar bandas
-electrónicas y densidades de estados producidas por el programa Quantum
-ESPRESSO. Se necesitan los módulos os, sys, ast, copy, glob, pathlib y
-configparser, de la librería estándar de Python, y también las librerías
-Numpy y Matplotlib.
+The script dosbandsplot.py, written in Python 3, can represent electronic bands
+and densities of states (DOS) calculated by the software Quantum ESPRESSO. The
+script needs the modules os, sys, ast, copy, glob, pathlib and configparser,
+from the Python’s standard library, and also the libraries NumPy and Matplotlib.
 
-    Para ejecutar el código sobre un archivo de bandas o de densidades de
-estados (o ambos), es necesario especificar algunos parámetros en un archivo
-de configuración. Para ejecutar el código debe escribirse en la terminal,
-estando en la carpeta del archivo dosbandsplot.py:
+	In order to run the code for a file of bands or densities of states (or
+both), it is necessary to specify some parameters in a configuration file. For
+running the code one has to write the following in the command line, being in
+the folder of the file dosbandsplot.py:
     
-		python3 dosbandsplot.py <dirección>  .
+		python3 dosbandsplot.py <path>  .
         
-    El argumento <dirección> es la ruta del archivo de configuración; si no se
-especifica, se usará la ruta './config.txt', es decir,se buscará en la carpeta
-actual (./) el archivo de configuración con nombre config.txt. Si el archivo
-dosbandsplot.py no está en la carpeta actual, sino en una carpeta con ruta <carpeta>,
-debe escribirse '<carpeta>/dosbandsplot.py' en lugar de 'dosbandsplot.py'. Además, si se
-incluye el archivo dosbandsplot.py en una carpeta de ejecutables del sistema,
-puede suprimirse 'python3' de la orden de ejecución.
+The argument <path> is the path of the configuration file; if one does not
+especify it, the path ./config.txt will be used, that is, the code will search
+in the current folder (./) the configuration file with name config.txt. If the
+file dosbandsplot.py is not inside the current folder, but in a folder with
+path <folder>, one should write <folder>/dosbandsplot.py instead of
+dosbandsplot.py. Moreover, if the file dosbandsplot.py is included in a folder
+of executables files, the term python3 can be removed from the command line,
+without needing to specify that folder.
 """
 
 import os
@@ -41,26 +42,26 @@ from matplotlib.lines import Line2D
 
 def get_wavevector(K1, K2, k1, k2, ki):
     """
-    Obtiene el vector de onda correspondiente a un número de onda.
+    Get te wavecector corresponding to a wavenumber.
     
-    Convierte un valor numérico de un número de onda cristalino correspondiente
-    a un solo tramo del espacio recíproco a un vector de onda cristalino, si
-    se conocen los puntos que delimitan dicho tramo.
+    Converts a numeric value of a crystalline wavenumber corresponding to just
+    one path in the reciprocal space to a crystalline wavevector, if the points
+    which delimite that path are known.
     
-    Argumentos
-    ----------
-    ki : float
-        Número de onda cristalino que se desea convertir.
-    k1, k2 : float
-        Números de onda cristalinos de los puntos que delimitan el tramo del
-        espacio recíproco donde se encuentra ki.   
-    K1, K2 : array (float)
-        Vectores de onda cristalinos asociados a los puntos k1,k2.
-        
-    Resultado
+    Arguments
     ---------
+    ki : float
+        Crystalline wavenumber to be converted.
+    k1, k2 : float
+        Crystalline wavenumbers that delimite the path of the reciprocal space
+        where ki is located.
+    K1, K2 : array (float)
+        Crystalline wavevectors associated to the points k1,k2.
+        
+    Returns
+    -------
     Ki : array (float)
-        Vector de onda cristalino correspondiente a ki.
+        Crystalline wavevector corresponding to ki.
     """
     K1, K2 = np.array(K1), np.array(K2)
     Ki = K1 + (K2-K1)*(ki-k1)/(k2-k1)
@@ -69,65 +70,65 @@ def get_wavevector(K1, K2, k1, k2, ki):
 
 def find_wavevector(ki, locs, coords):
     """
-    Obtiene el vector de onda correspondiente a un número de onda.
+    Find the wavevector corresponding to a wavenumber.
     
-    Convierte un valor numérico de un número de onda cristalino correspondiente
-    a varios tramos del espacio recíproco a un vector de onda cristalino.
-    Primero encuentra los puntos que delimitan el tramo donde se encuentra este
-    número de onda y después aplica la función get_wavevector.
+    Converts the numeric value of a crystalline wavenumber corresponding to
+    several paths of the reciprocal space to a crystalline wavevector. It first
+    finds the points which delimite the path where this wavenumber is located
+    and then applies the function get_wavevector.
     
-    Argumentos
-    ----------
-    ki : float
-        Número de onda cristalino que se desea convertir.
-    locs : array (float)
-        Números de onda cristalinos de los puntos que delimitan
-        los tramos del espacio recíproco.  
-    coords : array (float)
-        Vectores de onda de los puntos que delimitan los tramos del espacio
-        recíproco.
-        
-    Resultado
+    Arguments
     ---------
+    ki : float
+        Crystalline wavenumber to be converted.
+    locs : array (float)
+        Crystalline wavenumbers of the points which delimite the paths in the
+        reciprocal space.
+    coords : array (float)
+        Wavevectors of the points which delimite the paths in the reciprocal
+        space.
+        
+    Returns
+    -------
     Ki : array (float)
-        Vector de onda cristalino correspondiente a ki.
+        Crystalline wavevector corresponding to ki.
     """
     Ki = []
     for i in range(len(coords) - 1):
         if ki >= locs[i] and ki <= locs[i+1]:
             Ki = get_wavevector(K1=coords[i], K2=coords[i+1],
                                 k1=locs[i], k2=locs[i+1], ki=ki)
-            break      
+            break  
         
     return Ki
 
 def vector_to_text(v, delimiters='()', round_digits=4,
                    zeros=True, commas=True, blank=False):
     """
-    Transforma un vector a texto, usando las opciones de formato especificadas.
+    Transform a vector to text, using the specified formatting options.
     
-    Argumento
-    ----------
-    v : array
-        Vector numérico que desea transformarse a texto.
-    delimiters: str
-        Texo con los dos caracteres que quieran usarse como delimitadores
-        del vector.
-    round_digits : int
-        Número de cifras decimales máximas de cada elemento del vector.
-    zeros : bool
-        Determina si los números enteros se expresan como tal; por ejemplo,
-        '0' en vez de '0.0', '2' en vez de '2.0'.
-    commas : bool
-        Determina si se utilizan comas para separar los elementos del vector.
-    blank : bool
-        Determina si se añade un espacio entre los elementos del vector y los
-        delimitadores.
-        
-    Resultado
+    Arguments
     ---------
+    v : array
+        Numeric vector to be transformed to text.
+    delimiters: str
+        Text with the two characters which will be used as delimiters of the
+        vector.
+    round_digits : int
+        Number of maximum decimals for each vector element.
+    zeros : bool
+        It determines if the integers are expressed like that; for example,
+        '0' instead of '0.0', '2' instead of '2.0'.
+    commas : bool
+        It determines if commas are used to separate the vector elements.
+    blank : bool
+        It determines if a blank space is used between the vector elements and
+        the delimiters.
+        
+    Returns
+    -------
     s : str
-        Texto del vector v, con las opciones de formato especificadas.
+        Text of vector v, with the specified formatting options.
     """
     if len(delimiters) != 2:
         raise ValueError('The delimiter must have only 2 characters.')
@@ -146,12 +147,12 @@ def vector_to_text(v, delimiters='()', round_digits=4,
 
 def click(event):
     """
-    Permite obtener las coordenadas de un punto de una gráfica al hacer click.
+    Allow to obtain the coordinates of a point in a plot when clicking on it.
     
-    Argumento
+    Arguments
     ---------
     event : event
-    Evento de Python correspondiente a hacer click sobre la gráfica.
+    Python event corresponding to clicking on the plot.
     """
     if isinstance(event.artist, Line2D):
         selec = event.artist
@@ -166,21 +167,20 @@ def click(event):
 
 def full_path(text):
     """
-    Obtiene la ruta completa descrita en una cadena de texto.
+    Obtain the full path described in a text string.
     
-    Corrige el formato de la dirección, permitiendo el uso de las abreviaciones
-    propias del sistema operativo (por ejemplo, './', '../' y '~' para Unix).
+    It corrects the format of the path, allowing the use of the abbreviations
+    proper of the operating system (for example, './', '../' and '~' for Unix).
     
-    Argumento
-    ---------
+    Argument
+    --------
     text : str
-        Texto de ruta o dirección, que puede tener abreviaciones propias del
-        sistema operativo usado.
+        Text of the path.
         
     Resultado
     ---------
     path : str
-        Texto de la ruta completa, de modo que Python pueda usarlo.
+        Text of the full path, so that Python can use it.
     """
     path = copy.copy(text)
     if path.startswith('~'):
@@ -191,24 +191,24 @@ def full_path(text):
 
 def replace_limits(original_limits, variable):
     """
-    Cambia los valores de los límites de texto por números.
+    Change the values of the text limits by numbers.
     
-    Sustituye de los límites de la variable no especificados ('') y los que
-    hacen referencia al máximo ('max') o al mínimo ('min').
+    It replaces the limits of the variable which are not specified ('') and
+    those which references the maximum ('max') and the minimum ('min') value.
     
-    Argumentos
-    ----------
+    Arguments
+    ---------
     original_limits : list
-        Lista con los límites inferior y superior de la variable en cuestión.
-        Puede contener cadenas de texto, que serán traducidas a números.
+        List with the inferior and superior limits of the corresponding
+        variable.
     variable : array
-        Vector con los valores de la variable que se está tratando.
+        Vector with the values of the corresponding variable.
     
     Resultado
     ---------
     new_limits : list
-        Lista con los límites inferior y superior de la variable en cuestión,
-        con ambos valores numéricos.
+        List with the inferior and superior limits of the corresponding
+        variable, as numeric values.
     """
     new_limits = copy.copy(original_limits)
     
@@ -228,24 +228,24 @@ def replace_limits(original_limits, variable):
 
 def add_margin_to_limits(limits, original_limits, width=1/25):
     """
-    Añade un margen a los límites especificados cuando sea oportuno.
+    Add a margin to the specified limits when appropiate.
     
-    Si los límites originales no estaban especificados (''), añade un margen
-    a los actuales límites.
+    If the original limits were not specified (''), it adds a margin to the
+    current limits.
     
-    Argumentos
-    ----------
-    limits : list
-        Límites actuales, ambos valores numéricos.
-    original_limits : list
-        Límites originales, numéricos o de texto.
-    width : float
-        Tamaño del margen relativo al rango determinado por los límites.
-    
-    Resultado
+    Arguments
     ---------
+    limits : list
+        Current limits, both as numeric values.
+    original_limits : list
+        Original limits, as numeric or text values.
+    width : float
+        Size of the margin relative to the range defined by the limits.
+    
+    Returns
+    -------
     new_limits : list
-        Nuevos límites con el margen.
+        New limits with the margin.
     """
     new_limits = copy.copy(limits)
     
@@ -259,49 +259,49 @@ def add_margin_to_limits(limits, original_limits, width=1/25):
     
 def median_absolute_deviation(x, c=1.4826):
     """
-    Desviación absoluta mediana.
+    Return the median absolute deviation of the input values.
     
-    Argumentos
-    ----------
-    x : array (float)
-        Vector.
-    c : float
-        Factor de normalización; por defecto tiene un valor tal que la
-        desviación absoluta mediana de una distribución normal coincida con
-        su desviación estándar.
-    
-    Resultado
+    Arguments
     ---------
+    x : array (float)
+        Input vector.
+    c : float
+        Normalization factor; by default it has a value so that the median
+        absolute deviation of a normal distribution matches its standard
+        deviation.
+    
+    Returns
+    -------
     mad : float
-        Desviación absoluta mediana.
+        Median absolute deviation.
     """
-    mad = c*np.median(abs(x - np.median(x)))
+    mad = c * np.median(abs(x - np.median(x)))
     
     return mad
 
 def percentile_diagnostic_plots(indices, percentiles, derivative, limit_index,
                                 reference, condition_limit):
     """
-    Muestra dos gráficos de diagnóstico.
+    Show two diagnostic plots.
     
-    Muestra dos gráficos de diagnóstico del algoritmo de búsqueda automática
-    del límite superior de la densidad de estados.
+    It shows two diagnostic plots of the algorithm of automatic search of the
+    superior limit of the density of states.
     
-    Argumentos
-    ----------
+    Arguments
+    ---------
     indices : array (float)
-        Índices percentiles.
+        Percentile indices.
     percentiles : array (float)
-        Función percentil en función del índice.
+        Percentile function as a function of the index.
     derivative : array (float)
-        Derivada de la función percentil en función del índice.
+        Derivative of the percentile function as a function of the index.
     limit_index : float
-        Índice percentil calculado.
+        Calculated percentile index.
     reference : float
-        Valor de referencia para calcular el límite en la derivada
+        Reference value for calculating the limit on the derivative.
     condition_limit : float
-        Número por el que se multiplica el valor de referencia para así
-        calcular el límite de la derivada
+        Number to multiply the reference value to obtain the limit of the
+        derivative.
     """
     plt.figure(3, figsize=(10,8))
     
@@ -311,8 +311,8 @@ def percentile_diagnostic_plots(indices, percentiles, derivative, limit_index,
     plt.vlines(limit_index, 0, ylim1, linestyle='--', alpha=0.6)
     plt.ylim([0, ylim1])
     plt.margins(x=0)
-    plt.xlabel('índice percentil')
-    plt.ylabel('percentil', labelpad=6)
+    plt.xlabel('percentile index')
+    plt.ylabel('percentile', labelpad=6)
     
     plt.subplot(2,1,2, sharex=sp1)
     plt.plot(indices[1:], derivative, color='tab:green')
@@ -323,12 +323,12 @@ def percentile_diagnostic_plots(indices, percentiles, derivative, limit_index,
                linestyle='--', alpha=0.6)
     plt.ylim([0, ylim1])
     plt.margins(x=0)
-    plt.xlabel('índice percentil')
-    plt.ylabel('derivada del percentil', labelpad=8)
+    plt.xlabel('percentile index')
+    plt.ylabel('derivative of the percentile', labelpad=8)
     
     plt.tight_layout()
 
-#%% Valores predeterminados de las variables %%
+#%% Default variable values %%
 
 config = configparser.ConfigParser()
 
@@ -379,9 +379,9 @@ config['DENSITY OF STATES MODE'] = {
                     + "'cadetblue'")
 }
 
-# Lectura del archivo de configuración.
+# Reading of the configuration file.
 if len(sys.argv) == 1:
-    config_path = full_path('./config.txt')  # dirección predeterminada
+    config_path = full_path('./config.txt')  # default path
 else:
     config_path = full_path(sys.argv[1])
 config_folder = '/'.join(config_path.split('/')[:-1]) + '/'
@@ -391,7 +391,7 @@ if os.path.isfile(config_path):
 else:
     raise FileNotFoundError('Configuration file not found.')
 
-# Lectura de los argumentos.
+# Reading of the arguments.
 preamble = config['PREAMBLE']
 bands_mode = preamble.getboolean('bands mode')
 dos_mode = preamble.getboolean('density of states mode')
@@ -437,7 +437,7 @@ if dos_mode:
     density_units = ast.literal_eval(config_dos['density of states units'])
     dos_colors = ast.literal_eval(config_dos['plot colors'])
     
-# Opciones gráficas predeterminadas.
+# Default graphical options.
 plt.rcParams.update({'font.family': font})
 plt.rcParams.update({'font.size': font_size})
 plt.rcParams.update({'axes.linewidth': frame_width})
@@ -445,15 +445,17 @@ for i in ['x','y']:
     plt.rcParams.update({i+'tick.major.width': frame_width})
     plt.rcParams.update({i+'tick.minor.width': 0.8*frame_width})
 
-# %% Lectura y tratamiento de los datos de las bandas %%
+print()
+
+# %% Reading and processing of the bands data %%
 
 if bands_mode:
     
-    # Lectura de los datos.
+    # Reading of the data.
     bands_data = np.loadtxt(full_path(bands_folder + bands_file))
     wavenumber = bands_data[:,0]
     energy_k = bands_data[:,1] - energy_zero
-    # Parámetros de las bandas.
+    # Bands parameters.
     num_bands = list(wavenumber).count(wavenumber[0])
     inds = np.linspace(0, len(wavenumber), num_bands+1, dtype=int)
     num_band_points = np.diff(inds)[0]
@@ -461,7 +463,7 @@ if bands_mode:
         num_occupied_bands = num_bands - num_empty_bands
     else:
         num_occupied_bands = ''
-    # Puntos del espacio recíproco.
+    # Points of the reciprocal space
     k_names, k_coords = [], []
     for i in range(len(k_points)):
         k_names += list(k_points[i].keys())
@@ -469,7 +471,7 @@ if bands_mode:
     for i in range(len(k_names)):
         if k_names[i].startswith('|'):
             k_names[i] = '$\\overline{\\mathrm{' + k_names[i][1:] + '}}$'
-    # Obtención de los puntos que delimitan los tramos en el número de ondas.
+    # Calculation of the points which delimite the paths in the wavenumber.
     if k_names != []:
         k_locs = np.zeros(len(k_names))  # límites de los tramos
         k_locs[0] = wavenumber[0]
@@ -478,62 +480,62 @@ if bands_mode:
             k_locs[i] = wavenumber[i*int(num_band_points/(len(k_names)-1))
                                    - k_offset]
 
-#%% Lectura y tratamiento de los datos de las densidades de estados %%
+#%% Reading and processing of the density of states data %%
 
 if dos_mode:
 
-    # Lectura de todos los ficheros de densidades de estados.
+    # Reading of all the density of states file.
     dos_files = glob.glob(full_path(dos_folder + dos_prefix) + '.pdos_atm*')
     original_data = []
     for file in dos_files:
         original_data += [np.loadtxt(file)]
 
-    # Selección del vector de energías y lectura de la densidad total de estados,
-    # en caso de que se haya seleccionado dicha opción.
+    # Selection of the energy vector and reading of the total density of states,
+    # in case that option was selected.
     energy = original_data[0][:,0] - energy_zero
     if total_dos:
         total_density = np.loadtxt(full_path(dos_folder + dos_prefix)
                                    + '.pdos_tot')[:,2]
 
-    # Creación de un tensor con los datos de las densidades seleccionadas con
-    # una estructura adecuada para su posterior tratamiento.
+    # Creation of a tensor with the data of the selected densities with an
+    # appropiate structure for its posterior processing.
     dos_data = [[], [], [], [], [], []]
     if spin_orbit:
         dos_data += [[]]
-    # Bucle para los datos de cada archivo de datos.    
+    # Loop for the data of each file.
     for i in range(len(original_data)):
-        # Bucle para cada columna de densidad de estados.
+        # Loop for each column of density of states.
         for j in range(2, original_data[i].shape[1]):
             name = dos_files[i] + str(j-1)
-            dos_data[0] += [name]  # nombre del fichero
-            dos_data[1] += [original_data[i][:,j]]  # densidad de estados
+            dos_data[0] += [name]  # file name
+            dos_data[1] += [original_data[i][:,j]]  # density of states
             string1 = name.split('#')
             string2 = string1[1].split('(')
             string3 = string1[2].split('(')
-            dos_data[2] += [string2[0]]  # múmero de átomo
-            dos_data[3] += [string2[1][:-5]]  # elemento
+            dos_data[2] += [string2[0]]  # atom number
+            dos_data[3] += [string2[1][:-5]]  # element
             dos_data[4] += [string3[1][0]]  # orbital
             if not spin_orbit:
-                dos_data[5] += [string3[1][-1]]  # orientación    
+                dos_data[5] += [string3[1][-1]]  # orientation    
             else:
                 string4 = string3[1].split(')')
-                dos_data[5] += [string4[0][3:]]  # momento angular (j)
-                dos_data[6] += [string4[1]]  # orientación    
-    dos_data = np.array(dos_data)
+                dos_data[5] += [string4[0][3:]]  # angular moment (j)
+                dos_data[6] += [string4[1]]  # orientation
+    dos_data = np.array(dos_data, object)
 
-    #%% Selección de las densidades de estados proyectadas deseadas según los
-    #   parámetros del archivo de configuración %%
+    #%% Selection of the desired projected densities of states according to the
+    #   parameters of the configuration file %%
 
-    # Creación de la lista de parámetros con el formato adecuado a partir
-    # del archivo de configuración y creación de una lista similar de nombres.
+    # Creation of the parameter list with the appropiate format from the
+    # configuration file, and creation of a similar list of names.
     params, names = [], []
     for i in range(len(projections)):        
-        # Variables auxiliares para el modo suma.
+        # Auxiliary variables for the sum mode.
         if projections[i][1] == 'sum': 
             sum_params, sum_name = [], []
-        # Bucle para cada fila de proyecciones.
+        # Loop for each row of projections.
         for j in range(len(projections[i]) - 1):    
-            # Parámetros de las proyecciones.
+            # Parameters of the projections.
             atoms = str(projections[i][j][0])
             elements = projections[i][j][1]
             orbitals = projections[i][j][2]           
@@ -542,20 +544,20 @@ if dos_mode:
             else:
                 momentums = str(projections[i][j][3])
                 orientations = str(projections[i][j][4])
-            # Si está el modo suma, guarda los nombres juntos.
+            # It sum mode, it saves the names together.
             if projections[i][-1] == 'sum':                
                 if not spin_orbit:
                     sum_name += [[atoms, elements, orbitals, orientations]]
                 else:
                     sum_name += [[atoms, elements, orbitals, momentums,
                                   orientations]] 
-            # Bucles por el modo de escritura abreviado.
+            # Loops for the abbreviated writing mode.
             for atom in atoms.split('+'):               
                 for element in elements.split('+'):                
                     for orbital in orbitals.split('+'):
                         if not spin_orbit:                        
                             for orientation in orientations.split('+'):     
-                                # Adición de los parámetros y los nombres.
+                                # Addition the parameters and names.
                                 if projections[i][-1] == 'ind':
                                     params += [[[atom, element, orbital,
                                                  orientation]]]
@@ -567,7 +569,7 @@ if dos_mode:
                         else:                            
                             for momentum in momentums.split('+'):
                                 for orientation in orientations.split('+'):
-                                    # Adición de los parámetros y los nombres.
+                                    # Addition of parameters and names.
                                     if projections[i][-1] == 'ind':
                                         params += [[[atom, element, orbital,
                                                      momentum, orientation]]]
@@ -576,125 +578,123 @@ if dos_mode:
                                     elif projections[i][-1] == 'sum':
                                         sum_params += [[atom, element, orbital,
                                                         momentum, orientation]]
-        # Si está el modo suma, ahora se añaden los parámetros y los nombres.                                        
+        # If sum mode, now is the addition of parameters and names.                                 
         if projections[i][-1] == 'sum':            
             names += [sum_name]
             params += [sum_params]            
     
-    # Determinación de las máscaras condicionales para seleccionar las
-    # densidades de estados y creación de otro vector de nombres para etiquetar
-    # cada curva en la gráfica.         
+    # Calculation of the conditional masks to select the densities of states,
+    # and creation of another vector with names to label each curve on the plot.
     conds, labels = [[]]*len(params), ['']*len(params)
     for i in range(len(params)):    
         conds[i] = np.zeros(dos_data[1].shape, dtype=bool)        
         for j in range(len(params[i])):
             cond_ijk = []
-            # Bucle para los parámetros de las proyecciones.
+            # Loop for the parameters of the projections.
             for k in range(4 + int(spin_orbit)):
-                if params[i][j][k] == '':  # parámetro sin especificar
+                if params[i][j][k] == '':  # non-specified parameter
                     cond_ijk += [np.ones(dos_data[2+k,:].shape, dtype=bool)]
                 else:
                     cond_ijk += [dos_data[2+k,:] == params[i][j][k]]
-            # Producto de las condiciones para cada parámetro.
+            # Multiplication of the conditions for each parameter.
             cond_ij = cond_ijk[0]
             for k in range(1, len(cond_ijk)):
                 cond_ij &= cond_ijk[k]
-            # Adición de las condiciones de las proyecciones de la misma fila.
+            # Addition of the conditions for the projections of the same row.
             conds[i] += cond_ij
-        # Etiquetas de las proyecciones.
+        # Labels of the projections.
         for j in range(len(names[i])):
             labels[i] += '[' + ','.join(names[i][j]) + ']'    
         labels[i] = ']+\n['.join(labels[i].split(']['))
-    # Etiqueta de la densidad de estados total.
+    # Label of the total density of states.
     if spin_orbit:
         label_total_dens = '[,,,,]'
     else:
         label_total_dens = '[,,,]'
 
-    # Sustracción de las selecciones nulas, donde no se cumple ninguno de los
-    # requisitos especificados.
-    k = 0  # recuento de casos sustraídos
-    for i in range(len(conds)):  # bucle en orden inverso
+    # Subtraction of the null selections, where none of the requirements are
+    # fullfilled.
+    k = 0  # count of subtracted cases
+    for i in range(len(conds)):  # loop in reversed order
         if sum(conds[i-k]) == 0:   
             conds.pop(i-k)
             names.pop(i-k)
             labels.pop(i-k)
             k += 1
 
-    # Selección de las densidades de estados proyectadas deseadas.
+    # Selection of the desired projected densities of states.
     density = np.zeros((len(energy), len(conds)))
     for i in range(len(conds)):
         density[:,i] = sum(dos_data[1,conds[i]])
 
-    #%% Creación del archivo de salida, en caso de que se haya seleccionado
-    #   dicha opción %%
+    #%% Creation of the output file, in case this option was selected.
        
     if export_dos and len(conds) != 0:
         
-        # Matriz de datos.
+        # Data matrix.
         file_data = np.zeros((len(energy), len(conds) + 1))
         file_data[:,0] = energy   
         file_data[:,1:] = density
-        # Nombre del fichero.
+        # File name.
         file_name = '#'.join(labels).replace('\n', '')
         file_name = file_name.replace('#', '')
         file_name = dos_prefix + '-' + file_name
         file_name = file_name.replace('.dat', '').replace('txt', '') + '.txt'
-        # Títulos de las columnas.
+        # Column titles.
         titles = '#'.join(labels).replace('\n', '').split('#')
-        # Determinación de los espacios que separan cada columna
-        # (y ajuste en caso de que algún título sea más largo de la cuenta).
-        num_blanks = 20  # espacios de separación en cada columna
-        extra_blanks = 0  # espacios de corrección
+        # Determination of the blank spaces for separing each column
+        # (and adjusting in case any title is too much large)
+        num_blanks = 20  # number of blank spaces for each column
+        extra_blanks = 0  # correction blank spaces
         for i in range(len(titles)):
-            # Si hay suficiente espacio hasta la siguiente columna,
-            # no hay corrección.
+            # If it is enough space until the next column, there is no
+            # correction.
             if (num_blanks - len(titles[i]) - extra_blanks) >= 2:
                 blank_spaces = ' '*(num_blanks - len(titles[i]) - extra_blanks)
                 extra_blanks = 0
-            # Si no hay suficiente espacio hasta la siguiente columna,
-            # se desplaza un poco el título de dicha siguiente columna.
+            # If there is not enough space until the next column, there is a
+            # slight shift in the title of that next column.
             else:  
                  blank_spaces = '  '
                  extra_blanks += len(titles[i]) - num_blanks + 2 
             titles[i] = titles[i] + blank_spaces  # títulos de las columnas               
-        # Espacios para alinear los títulos de las columnas.
+        # Blanck spaces to align the column titles.
         num_blanks_energy = num_blanks - 5 - len(energy_units)
         num_blanks_density = num_blanks + 2 - len(density_units)
         num_blanks_delimiter = num_blanks - 9
         
-        # Título final.
+        # Final title.
         title = ('E (' + energy_units + ')' + ' '*num_blanks_energy
                  + 'pDOS (' + density_units + ')\n'
                  + ' '*num_blanks_density + ''.join(titles))
-        # Exportación de los datos a un fichero de texto.
+        # Exporting of the data to a text file.
         np.savetxt(file_name, file_data, fmt='%1.3e', header=title,
                    delimiter=' '*num_blanks_delimiter)
         
         print('The file ' + file_name + ' has been generated.')
  
-#%% Gráficas del modo de densidad de estados (y de ambos modos a la vez) %%
+#%% Plots of the density of states mode (and both modes at the same time) %%
 
 if dos_mode:
 
     if len(conds) == 0:
         raise ValueError('There is no density of states meeting the requirements.')
 
-    # Límites en la energía y la densidad de estados.
+    # Limits of the energy and the density of states.
     original_energy_limits = copy.copy(energy_limits)
     original_density_limits = copy.copy(density_limits)
     energy_limits = replace_limits(energy_limits, energy)
-    # Límites en la energía para la gráfica ampliada.
+    # Limits of the energy for the zoomed plot.
     energy_center, energy_amplitude = tuple(energy_zoom_params.values())
     energy_zoom_limits = [energy_center - energy_amplitude,
                           energy_center + energy_amplitude]
 
-    # Si también hay gráfico de bandas, cálculo de los límites en la energía.
+    # If there is also a band plot, calculation of the energy limits.
     if bands_mode:
-        # Límites en la energía.
+        # Energy limits.
         bands_energy_limits = copy.copy(original_energy_limits)
         bands_energy_limits = replace_limits(bands_energy_limits, energy_k)
-        # Rango de energías que determina los límites en dicha variable.
+        # Energy range that determines the limits in that variable.
         if energy_range_priority not in ['bands', 'density of states',
                                          'intersection', 'union']:
             raise ValueError("Energy range priority should be 'bands', "
@@ -710,11 +710,11 @@ if dos_mode:
             energy_limits[0] = min(energy_limits[0], bands_energy_limits[0])
             energy_limits[1] = max(energy_limits[1], bands_energy_limits[1])
 
-    # Añadido de un pequeño margen a los límites en la energía.
+    # Adding of a little margin to energy limits.
     energy_limits = add_margin_to_limits(energy_limits, original_energy_limits,
                                          width=1/25)
 
-    # Densidades de estados usadas para determinar los límites en esta variable.
+    # Densities of states used to determine the limits in this variable.
     dens_comb = np.array([])
     cond = (energy >= energy_limits[0]) & (energy <= energy_limits[1])
     for i in range(density.shape[1]):
@@ -723,43 +723,43 @@ if dos_mode:
         dens_comb = np.concatenate((dens_comb, total_density[cond]))
     dens_comb = dens_comb[dens_comb != 0]
         
-    # Algoritmo para la detección automática del límite superior de la densidad
-    # de estados. Calcula la función percentil para un rango de índices
-    # percentiles y detecta en qué indice su derivada aumenta considerablemente,
-    # usando ese índice para calcular el límite deseado.
+    # Algorithm for the automatic determination of the superior limit of the
+    # density of states. It calculates de percentile function for a range of
+    # percentile indices and detects in which index its derivative increases
+    # considerably, using that index to calculate the desired index.
     if density_limits[1] == 'auto':
         mad = median_absolute_deviation(dens_comb)
-        indices = np.linspace(92, 100, int(1E3))  # índices percentiles
+        indices = np.linspace(92, 100, int(1E3))  # percentile indices
         percentiles = np.percentile(dens_comb, indices) / mad
         derivative = np.diff(percentiles) / np.diff(indices)
         derivative_non0 = derivative[derivative != 0]
         reference = np.median(derivative_non0[:int(0.5*len(derivative_non0))])
-        # Condición para obtener el índice percentil buscado.
+        # Condition to obtain the desired percentile index.
         cond = derivative > 50*reference
         if cond.sum() != 0:
             limit_index = indices[1:][cond].min()
         else:
             limit_index = indices[-1]
-        # Límite obtenido con el índice percentil límite.
+        # Limit obtained with the limit percentile index.
         cond = dens_comb < np.percentile(dens_comb, limit_index)
         margin = (dens_comb[cond].max() - dens_comb[cond].min()) / 10
         dens_lim_perc = np.percentile(dens_comb, limit_index) + margin + 1.5*mad
-#        percentile_diagnostic_plots(indices, percentiles, derivative,
-#                                    limit_index, reference, 50)
-        # Límite obtenido con el máximo de la densidad de estados más un margen.
+        # percentile_diagnostic_plots(indices, percentiles, derivative,
+        #                             limit_index, reference, 50)
+        # Limit obtained with the maximum of the density of states plus a margin.
         margin = (dens_comb.max() - dens_comb.min()) / 25
         dens_lim_norm = dens_comb.max() + margin
-        # Mínimo límite de ambos.
+        # Minimum of both limits.
         density_limits[1] = min(dens_lim_norm, dens_lim_perc)
 
-    # Correcciones en los límites en la densidad de estados.
+    # Corrections on the density of states limits.
     density_limits = replace_limits(density_limits, dens_comb)
     density_limits = add_margin_to_limits(density_limits,
                                           original_density_limits, width=1/25)
     if original_density_limits[0] == '':
         density_limits[0] = max(0, density_limits[0])
     
-   # Figuras. (f = 1 para la gráfica ampliada)
+   # Figures. (f = 1 for the zoomed plot)
     for f in reversed(range(1 + int(energy_zoom))):
         
         if bands_mode:
@@ -769,63 +769,63 @@ if dos_mode:
         plt.clf()
         
         if bands_mode:
-            # Gráfica de bandas (izquierda).
+            # Bands plot (left).
             ax1 = plt.subplot(1,2,1)
 
-            # Colores de los símbolos, dependiendo de si se conocen las
-            # bandas ocupadas y las vacías.
+            # Symbol colors, depending on if the occupied and empty bands are
+            # known.
             if num_occupied_bands == '':
                 num_occupied_bands = num_bands
                 color1, color2 = [bands_colors[0]]*2
             else:
                 color1, color2 = bands_colors[1:]
   
-            # Representación de las bandas ocupadas
-            # (o todas si no se sabe cuántas están ocupadas).
+            # Plotting of the occupied bands
+            # (or all of them if the number of occupied ones is unknown).
             for i in range(0, num_occupied_bands):  # bucle para cada banda
                 wavenumber_i = wavenumber[inds[i] : inds[i+1]]
                 energy_i = energy_k[inds[i] : inds[i+1]]
                 plt.plot(wavenumber_i, energy_i, '.-', color=color1,
                          ms=6*scale, lw=1*scale, alpha=0.3/scale, zorder=1/3)
-            # Representación de las bandas vacías
-            # (o ninguna más si no se sabe cuántas hay vacías).
-            for i in range(num_occupied_bands, num_bands):  # bucle para cada banda
+            # Plotting of the empty bands
+            # (or none else if the number of empty bands is unksnown).
+            for i in range(num_occupied_bands, num_bands):  # loop for each band
                 wavenumber_i = wavenumber[inds[i] : inds[i+1]]
                 energy_i = energy_k[inds[i] : inds[i+1]]
                 plt.plot(wavenumber_i, energy_i, '.-', color=color2,
                          ms=6*scale, lw=1*scale, alpha=0.3/scale, zorder=1/3)       
             plt.margins(x=0)
 
-            # Límites.
+            # Limits.
             if f == 1:
                 plt.ylim(energy_zoom_limits)
             else:
                 plt.ylim(energy_limits)
             xlims, ylims = plt.xlim(), plt.ylim()
-            # Líneas verticales para separar los caminos.
+            # Vertical lines to separate the paths.
             if k_names != '':
                 for x in k_locs:
                     plt.vlines(x, ylims[0], ylims[1], color='black',
                                lw=0.8*frame_width, zorder=3/3)  
-            # Líneas horizontales para las energías seleccionadas.
+            # Horizontal lines for the selected energies.
             for y in energy_lines:
                 plt.hlines(y, xlims[0], xlims[1], color='black',
                            linestyle=(0,(6,6)), lw=0.8*frame_width, zorder=2/3)
-            # Etiquetas del espacio recíproco.
+            # Labels of the reciprocal space.
             if k_names != []:
                 plt.xticks(k_locs, k_names)
             else:
                 plt.xticks([])   
-            # Texto de los ejes y título.
+            # Text of the axes and the title.
             plt.xlabel(k_label, labelpad=6)
             plt.ylabel(energy_label, labelpad=6)
             plt.title(bands_title, fontweight='bold', pad=10)
             plt.tight_layout()
 
-            # Gráfica de densidades de estado (derecha).
+            # Densities of states plot (right).
             ax2 = plt.subplot(1,2,2, sharey=ax1)
 
-        # Representación de las densidades de estados.
+        # Plotting of the densities of states.
         for i in range(len(conds)):   
             if labels[i] != label_total_dens:
                 color, ls, lw = dos_colors[i%len(dos_colors)], '-', 2
@@ -837,38 +837,38 @@ if dos_mode:
             plt.plot(total_density, energy, color='black', linestyle='--',
                      linewidth=1*scale, label=label_total_dens)
             
-        # Límites.
+        # Limits.
         plt.xlim(density_limits)
-        if f == 1: # gráfica ampliada
+        if f == 1: # zoomed plot
             plt.ylim([energy_zoom_limits])
         else:
             plt.ylim(energy_limits)  
         xlims, ylims = plt.xlim(), plt.ylim()
-        # Líneas horizontales para las energías seleccionadas.
+        # Horizontal lines for the selected energies.
         for y in energy_lines:
             plt.hlines(y, xlims[0], xlims[1], color='black', lw=0.8*frame_width,
                        linestyle=(0,(6,6)), zorder=(len(conds)+2)/3)
         plt.xlim(xlims)
         plt.ylim(ylims)
-        # Ajustes en el eje vertical.
+        # Tweaks on the vertical axis.
         if bands_mode:
             ax2.yaxis.tick_right()
-#            plt.tick_params(left=True)
+            # plt.tick_params(left=True)
         else:
             plt.ylabel(energy_label, labelpad=6)
-        # Texto de la gráfica.
+        # Plot texts.
         plt.xlabel(density_label, labelpad=6)
         plt.legend(ncol=1, markerfirst=False)
         plt.title(dos_title, fontweight='bold', pad=12)
         plt.tight_layout()
-#        # Marcas.
-#        ax2.yaxis.set_major_locator(plt.AutoLocator())
-#        ax2.minorticks_on()
+        # Marks.
+        # ax2.yaxis.set_major_locator(plt.AutoLocator())
+        # ax2.minorticks_on()
     
-    # Creación de una imagen para cada figura (normal y ampliación).
+    # Creation of an image for each figure (normal and zoomed).
     if save_image: 
         image_name = '-' + ''.join(labels).replace('\n', '')
-        extension = ['','-z']  # extensión para la gráfica ampliada
+        extension = ['','-z']  # extension for the zoomed plot
         for f in range(1 + int(energy_zoom)):
             plt.figure(f+1)
             image_name = (dos_prefix + image_name + extension[f]
@@ -881,26 +881,26 @@ if dos_mode:
     
     plt.show()
 
-#%% Gráfica del modo de bandas %%
+#%% Bands mode plot %%
 
 elif bands_mode and not dos_mode:
     
-    # Límites en la energía
+    # Energy limits.
     original_energy_limits = copy.copy(energy_limits)
     energy_limits = replace_limits(energy_limits, energy_k)
     energy_limits = add_margin_to_limits(energy_limits, original_energy_limits,
                                          width=1/25)    
-    # Figura.
+    # Figure.
     fig = plt.figure(1, figsize=figure_dimensions), plt.clf()
-    # Colores.
+    # Colors.
     if num_occupied_bands != '':
         color1, color2 = bands_colors[1:]
     else:
         num_occupied_bands = num_bands
         color1, color2 = [bands_colors[0]]*2
 
-    # Representación de las bandas ocupadas.
-    # (o todas si no se sabe cuántas están ocupadas)
+    # Plotting of the occupied bands
+    # (or all of them if the number of occupied ones is unknown).
     occupied_bands_maxs = []
     for i in range(0, num_occupied_bands):  # bucle para cada banda
         wavenumber_i = wavenumber[inds[i] : inds[i+1]]
@@ -908,28 +908,28 @@ elif bands_mode and not dos_mode:
         plt.plot(wavenumber_i, energy_i, '.-', color=color1, ms=6*scale,
                  lw=1*scale, alpha=0.3/scale, picker=1, zorder=1/3)
         occupied_bands_maxs += [max(energy_i)]
-    # Representación de las bandas vacías.
-    # (o ninguna más si no se sabe cuántas están vacías)
+    # Plotting of the occupied bands
+    # (or all of them if the number of occupied ones is unknown).
     if num_empty_bands != '':
         empty_bands_mins = [] 
-        for i in range(num_occupied_bands, num_bands):  # bucle para cada banda
+        for i in range(num_occupied_bands, num_bands):  # loop for each band
             wavenumber_i = wavenumber[inds[i] : inds[i+1]]
             energy_i = energy_k[inds[i] : inds[i+1]]
             plt.plot(wavenumber_i, energy_i, '.-', color=color2, ms=6*scale,
                      lw=1*scale, alpha=0.3/scale, picker=1, zorder=1/3)
             empty_bands_mins += [min(energy_i)]
 
-        # Caso de distinguir entre bandas ocupadas y vacías.
+        # Case of distinguishing occupied and empty bands.
         if num_empty_bands > 0 and num_occupied_bands > 0:
-            # Cálculo del máximo de la banda de conducción y el mínimo de la
-            # banda de valencia.
+            # Calculation of the maximum of the confuction band and the minimum
+            # of the valence band.
             cond_band_min = min(occupied_bands_maxs)
             val_band_max = max(empty_bands_mins)       
             cond_band_min_k = wavenumber[energy_k == cond_band_min][0]
             val_band_max_k = wavenumber[energy_k == val_band_max][0]
             cond_band_min_point = find_wavevector(cond_band_min_k, k_locs, k_coords)
             val_band_max_point = find_wavevector(val_band_max_k, k_locs, k_coords) 
-            # Texto en la terminal.
+            # Terminal text.
             print('Points:', k_names)
             if len(k_coords) != 0:
                 print('{' + ', '.join([vector_to_text(vec) for vec in k_coords])
@@ -941,34 +941,36 @@ elif bands_mode and not dos_mode:
                   ('{' + str(val_band_max_k) + '}').replace('.0}', '}'),
                   vector_to_text(val_band_max_point))
 
-    # Límites de los ejes.
+    # Axes limits.
     plt.margins(x=0)
     plt.ylim([energy_limits[0], energy_limits[1]])
     xlims, ylims = plt.xlim(), plt.ylim()
-    # Líneas verticales para separar los caminos.
+    # Vertical lines to separate paths.
     if k_names != []:
         for x in k_locs:
             plt.vlines(x, ylims[0], ylims[1], color='black',
                        lw=0.8*frame_width, zorder=3/3)
         plt.xticks(k_locs, k_names)
-    # Líneas horizontales para las energías seleccionadas.
+    # Horizontal lines for the selected energies.
     for y in energy_lines:
         plt.hlines(y, xlims[0], xlims[1], color='black', lw=0.8*frame_width,
                    linestyle=(0,(6,6)), zorder=2/3)     
-    # Textos de la figura.
+    # Figure texts.
     plt.xlabel(k_label, labelpad=6)
     plt.ylabel(energy_label, labelpad=6)
     plt.title(bands_title, fontweight='bold', pad=12)
     plt.tight_layout()
 
-    # Creación de una imagen de la figura.
+    # Cretion of an image of the plot.
     if save_image:
         image_name = bands_file + '.' + image_format
         image_name = image_name.replace('.dat', '').replace('.txt', '')
         plt.savefig(image_name, format=image_format, dpi=240)
         print('Figure 1 has been saved as ' + image_name + '.')
 
-    # Modo interactivo.
+    # Interactive mode.
     fig[0].canvas.mpl_connect('pick_event', click)
 
     plt.show()
+
+print()
