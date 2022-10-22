@@ -1,30 +1,25 @@
-# Configuration file for the script dosbands.py.
+# Configuration file for the script dosbandsplot.py.
 
 [PREAMBLE]
-bands mode = yes
-density of states mode = yes
+bands mode: yes
+density of states mode: yes
 
 [COMMON OPTIONS]
-save image = yes
-energy limits = [-1,'']
-energy label = 'energía (eV)'
+save image: yes
+energy limits: [-1,'']
 
 [BANDS MODE]
-folder = './bands/'
-file = 'bands_Si.dat'
-wavevector points = {'X': (0,0.5,0.5)}, {'Γ': (0,0,0)}, {'L': (0.5,0.5,0.5)}
-number of empty bands = 30
-plot title = 'Bandas de energía'
-wavevector label = 'vector de onda'
+folder: './bands/'
+fil: 'bands_Si.dat'
+wavevector points: {'X': (0,0.5,0.5)}, {'Γ': (0,0,0)}, {'L': (0.5,0.5,0.5)}
+number of empty bands: 30
 
 [DENSITY OF STATES MODE]
-folder = './pDOS/'
-files prefix = 'pDOS_Si.dat'
-export densities of states = yes
-total density of states = yes
-spin-orbit = yes
-density of states limits = [0,'auto']
-plot title = 'Densidades parciales de estados'
-density of states label = 'densidad de estados (/eV)'
-projections = ([('','','s+p','',''),'ind'],
+folder: './pDOS/'
+files prefix: 'pDOS_Si.dat'
+export densities of states: yes
+total density of states: yes
+spin-orbit: yes
+density of states limits: [0,'auto']
+projections: ([('','','s+p','',''),'ind'],
                [('','','s+p','',''),'sum'])
