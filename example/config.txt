@@ -6,7 +6,7 @@ density of states mode: yes
 
 [COMMON OPTIONS]
 save image: yes
-energy limits: [-1,'']
+energy limits: [-1, '']
 
 [BANDS MODE]
 folder: './bands/'
@@ -20,6 +20,6 @@ files prefix: 'pDOS_Si.dat'
 export densities of states: yes
 total density of states: yes
 spin-orbit: yes
-density of states limits: [0,'auto']
+density of states limits: [0, 'auto']
 projections: ([('','','s+p','',''),'ind'],
               [('','','s+p','',''),'sum'])
