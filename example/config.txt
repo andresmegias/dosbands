@@ -22,4 +22,4 @@ total density of states: yes
 spin-orbit: yes
 density of states limits: [0,'auto']
 projections: ([('','','s+p','',''),'ind'],
-               [('','','s+p','',''),'sum'])
+              [('','','s+p','',''),'sum'])
