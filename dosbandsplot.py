@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Electronic Density of States and Bands Plotter v1.3
-Copyright (C) 2022 - Andrés Megías
+Copyright (C) 2022 - Andrés Megías (github.com/andresmegias)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
