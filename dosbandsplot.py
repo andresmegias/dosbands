@@ -1,32 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Electronic Density of States and Bands Plotter
-dosbandsplot.py
-1.3
+Electronic Density of States and Bands Plotter v1.3
+Copyright (C) 2022 - Andrés Megías
 
-Andrés Megías Toledano
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-The script dosbandsplot.py, written in Python 3, can represent electronic bands
-and densities of states (DOS) calculated by the software Quantum ESPRESSO. The
-script needs the modules os, sys, ast, copy, glob, pathlib and configparser,
-from the Python’s standard library, and also the libraries NumPy and Matplotlib.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
 
-	In order to run the code for a file of bands or densities of states (or
-both), it is necessary to specify some parameters in a configuration file. For
-running the code one has to write the following in the command line, being in
-the folder of the file dosbandsplot.py:
-    
-		python3 dosbandsplot.py <path>  .
-        
-The argument <path> is the path of the configuration file; if one does not
-especify it, the path ./config.txt will be used, that is, the code will search
-in the current folder (./) the configuration file with name config.txt. If the
-file dosbandsplot.py is not inside the current folder, but in a folder with
-path <folder>, one should write <folder>/dosbandsplot.py instead of
-dosbandsplot.py. Moreover, if the file dosbandsplot.py is included in a folder
-of executables files, the term python3 can be removed from the command line,
-without needing to specify that folder.
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import os
